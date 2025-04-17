@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listas de Compras Avançadas</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --danger-color: #e74c3c;
+            --danger-hover: #c0392b;
+            --text-color: #333;
+            --light-gray: #f5f5f5;
+            --medium-gray: #ddd;
+            --dark-gray: #95a5a6;
+            --white: #fff;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .app-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .lists-sidebar {
+            flex: 1;
+            min-width: 250px;
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .list-container {
+            flex: 3;
+            min-width: 300px;
+            background-color: var(--white);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-group {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .input-field {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .quantity-field {
+            width: 100px;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--medium-gray);
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+            transition: border 0.3s;
+            box-sizing: border-box;
+        }
+        
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+        }
+        
+        button {
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+        
+        #listaCompras {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid var(--medium-gray);
+            transition: background-color 0.2s;
+            gap: 10px;
+        }
+        
+        .item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .item-checkbox {
+            margin-right: 5px;
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+        
+        .item-text {
+            flex: 1;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .item-quantity {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-left: 5px;
+        }
+        
+        .item.comprado .item-text {
+            text-decoration: line-through;
+            color: var(--dark-gray);
+        }
+        
+        .item.comprado .item-quantity {
+            color: var(--dark-gray);
+        }
+        
+        .stats {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        .lists {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        
+        .list-item {
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .list-item:hover {
+            background-color: var(--light-gray);
+        }
+        
+        .list-item.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+        
+        .list-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .no-lists {
+            text-align: center;
+            color: var(--dark-gray);
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .lists-sidebar, .list-container {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Listas de Compras</h1>
+    
+    <div class="app-container">
+        <div class="lists-sidebar">
+            <div class="input-group">
+                <input type="text" id="newListName" placeholder="Nome da nova lista">
+                <button id="createListBtn">Criar Lista</button>
+            </div>
+            
+            <h3>Suas Listas</h3>
+            <ul class="lists" id="listsContainer">
+                <!-- Listas serão adicionadas aqui dinamicamente -->
+            </ul>
+        </div>
+        
+        <div class="list-container" id="currentListContainer">
+            <h2 id="currentListTitle">Selecione uma lista</h2>
+            
+            <div id="listContent" style="display: none;">
+                <div class="input-group">
+                    <div class="input-field">
+                        <input type="text" id="itemInput" placeholder="Digite um item...">
+                    </div>
+                    <div class="quantity-field">
+                        <input type="text" id="quantityInput" placeholder="Qtd (ex: 2kg)" value="1">
+                    </div>
+                    <button id="addButton">Adicionar</button>
+                </div>
+                
+                <ul id="listaCompras"></ul>
+                
+                <div class="stats" id="stats">
+                    Total itens: <span id="total">0</span> | 
+                    Comprados: <span id="comprados">0</span> | 
+                    Restantes: <span id="restantes">0</span>
+                </div>
+            </div>
+            
+            <div id="noListSelected" style="text-align: center; margin-top: 50px; color: #95a5a6;">
+                <p>Selecione uma lista existente ou crie uma nova</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos da interface
+            const newListNameInput = document.getElementById('newListName');
+            const createListBtn = document.getElementById('createListBtn');
+            const listsContainer = document.getElementById('listsContainer');
+            const currentListTitle = document.getElementById('currentListTitle');
+            const currentListContainer = document.getElementById('currentListContainer');
+            const listContent = document.getElementById('listContent');
+            const noListSelected = document.getElementById('noListSelected');
+            
+            const itemInput = document.getElementById('itemInput');
+            const quantityInput = document.getElementById('quantityInput');
+            const addButton = document.getElementById('addButton');
+            const listaCompras = document.getElementById('listaCompras');
+            const totalSpan = document.getElementById('total');
+            const compradosSpan = document.getElementById('comprados');
+            const restantesSpan = document.getElementById('restantes');
+            
+            // Carregar listas do localStorage
+            let shoppingLists = JSON.parse(localStorage.getItem('shoppingLists')) || [];
+            let currentListId = null;
+            
+            // Atualizar estatísticas
+            function atualizarEstatisticas(items) {
+                const total = items.length;
+                const comprados = items.filter(item => item.comprado).length;
+                const restantes = total - comprados;
+                
+                totalSpan.textContent = total;
+                compradosSpan.textContent = comprados;
+                restantesSpan.textContent = restantes;
+            }
+            
+            // Renderizar lista de compras
+            function renderizarListaCompras(items) {
+                listaCompras.innerHTML = '';
+                
+                items.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'item' + (item.comprado ? ' comprado' : '');
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'item-checkbox';
+                    checkbox.checked = item.comprado;
+                    checkbox.addEventListener('change', function() {
+                        items[index].comprado = this.checked;
+                        salvarListas();
+                        renderizarListaCompras(items);
+                        atualizarEstatisticas(items);
+                    });
+                    
+                    const span = document.createElement('span');
+                    span.className = 'item-text';
+                    span.innerHTML = `${item.texto} <span class="item-quantity">${item.quantidade}</span>`;
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-btn btn-danger btn-small';
+                    deleteBtn.textContent = 'Remover';
+                    deleteBtn.addEventListener('click', function() {
+                        items.splice(index, 1);
+                        salvarListas();
+                        renderizarListaCompras(items);
+                        atualizarEstatisticas(items);
+                    });
+                    
+                    li.appendChild(checkbox);
+                    li.appendChild(span);
+                    li.appendChild(deleteBtn);
+                    
+                    listaCompras.appendChild(li);
+                });
+                
+                atualizarEstatisticas(items);
+            }
+            
+            // Renderizar a sidebar com todas as listas
+            function renderizarListas() {
+                listsContainer.innerHTML = '';
+                
+                if (shoppingLists.length === 0) {
+                    listsContainer.innerHTML = '<div class="no-lists">Nenhuma lista criada</div>';
+                    return;
+                }
+                
+                shoppingLists.forEach((list, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'list-item' + (currentListId === list.id ? ' active' : '');
+                    li.dataset.id = list.id;
+                    
+                    const listName = document.createElement('span');
+                    listName.textContent = list.name;
+                    
+                    const actions = document.createElement('div');
+                    actions.className = 'list-actions';
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn-danger btn-small';
+                    deleteBtn.textContent = 'Excluir';
+                    deleteBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (confirm(`Tem certeza que deseja excluir a lista "${list.name}"?`)) {
+                            shoppingLists = shoppingLists.filter(l => l.id !== list.id);
+                            salvarListas();
+                            renderizarListas();
+                            
+                            if (currentListId === list.id) {
+                                currentListId = null;
+                                mostrarListaVazia();
+                            }
+                        }
+                    });
+                    
+                    actions.appendChild(deleteBtn);
+                    
+                    li.appendChild(listName);
+                    li.appendChild(actions);
+                    
+                    li.addEventListener('click', function() {
+                        currentListId = list.id;
+                        carregarLista(list.id);
+                        renderizarListas();
+                    });
+                    
+                    listsContainer.appendChild(li);
+                });
+            }
+            
+            // Carregar uma lista específica
+            function carregarLista(listId) {
+                const list = shoppingLists.find(l => l.id === listId);
+                if (list) {
+                    currentListTitle.textContent = list.name;
+                    listContent.style.display = 'block';
+                    noListSelected.style.display = 'none';
+                    renderizarListaCompras(list.items);
+                }
+            }
+            
+            // Mostrar tela quando nenhuma lista está selecionada
+            function mostrarListaVazia() {
+                currentListTitle.textContent = 'Selecione uma lista';
+                listContent.style.display = 'none';
+                noListSelected.style.display = 'block';
+            }
+            
+            // Salvar listas no localStorage
+            function salvarListas() {
+                localStorage.setItem('shoppingLists', JSON.stringify(shoppingLists));
+            }
+            
+            // Adicionar novo item à lista atual
+            function adicionarItem() {
+                if (!currentListId) return;
+                
+                const texto = itemInput.value.trim();
+                const quantidade = quantityInput.value.trim() || '1';
+                
+                if (texto) {
+                    const listIndex = shoppingLists.findIndex(l => l.id === currentListId);
+                    if (listIndex !== -1) {
+                        shoppingLists[listIndex].items.push({
+                            texto: texto,
+                            quantidade: quantidade,
+                            comprado: false
+                        });
+                        
+                        salvarListas();
+                        itemInput.value = '';
+                        quantityInput.value = '1';
+                        itemInput.focus();
+                        renderizarListaCompras(shoppingLists[listIndex].items);
+                    }
+                }
+            }
+            
+            // Criar nova lista
+            function criarLista() {
+                const listName = newListNameInput.value.trim();
+                
+                if (listName) {
+                    const newList = {
+                        id: Date.now().toString(),
+                        name: listName,
+                        items: []
+                    };
+                    
+                    shoppingLists.push(newList);
+                    salvarListas();
+                    newListNameInput.value = '';
+                    
+                    currentListId = newList.id;
+                    carregarLista(newList.id);
+                    renderizarListas();
+                }
+            }
+            
+            // Event listeners
+            createListBtn.addEventListener('click', criarLista);
+            newListNameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    criarLista();
+                }
+            });
+            
+            addButton.addEventListener('click', adicionarItem);
+            itemInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    adicionarItem();
+                }
+            });
+            
+            quantityInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    adicionarItem();
+                }
+            });
+            
+            // Inicializar a aplicação
+            if (shoppingLists.length > 0) {
+                currentListId = shoppingLists[0].id;
+                carregarLista(currentListId);
+            } else {
+                mostrarListaVazia();
+            }
+            
+            renderizarListas();
+        });
+    </script>
+</body>
+</html>
